@@ -1,29 +1,75 @@
 const fs = require('fs')
 const express = require('express')
-const bp = require('body-parser')
-const { Router } = express
+const multer = require('multer')
+const http = require('http')
 const Container = require('./Functionalities/Constructor')
+const handlebars = require('express-handlebars')
+const { Router } = express
 
 const app = express()
+
+const server=http.createServer(app)
+
+app.use(express.json())
+app.use(express.urlencoded({extended:false}))
+
 const router = Router()
-app.use(bp.json())
-app.use(bp.urlencoded({extended: true}))
+
+app.use('/api',router)
+// multer
+let storage = multer.diskStorage({
+    destination:function(req,res,cb){
+        cb(null,'update')
+    },
+    filename:function(req,res,cb){
+        cb(null,'multerFilesTest_'+res.originalname)
+    }
+})
+
+let update = multer({storage}) 
+
+//handlebars
+
+app.set('views','./views')
+app.set('view engine', 'hbs')
+
+app.engine('hbs', handlebars({
+    extname:'.hbs',
+    layoutsDir: __dirname+'/views/layouts',
+    defaultLayout:'main.hbs'
+}))
+
 
 const container = new Container ('./data/db.txt')
-       
-    router.get("/", (req,res) => {
 
-        res.send('main page')
+    router.get("/",async (req,res) => {
 
-    })
+        let product = await container.getAll()
 
-    router.get("/hola", (req,res) => {
+        console.log(product)
 
-        res.send('hola')
+        res.render('products.hbs',{product:product})
 
     })
 
-    router.get("/product", async (req,res) => {
+    router.get("/addProducts", (req,res) => {
+
+        res.render('addProducts.hbs')
+
+    })
+
+    router.post("/addProducts",async (req,res) => {
+
+        console.log('aaaaaaaaaa',req.body)
+        const {name,price} = req.body
+        const obj = {name,price}
+        await container.saveProd(obj)
+        console.log('saved')
+        res.redirect("/api")
+    
+    })
+
+    router.get("/allProducts", async (req,res) => {
 
         res.send(await container.getAll());
 
@@ -52,7 +98,7 @@ const container = new Container ('./data/db.txt')
 
     })
 
-    router.post("/product/add", async (req,res) => {
+    router.post("/product/add",async  (req,res) => {
 
         const {name,price} = req.body
         const obj = {name,price}
@@ -67,11 +113,16 @@ const container = new Container ('./data/db.txt')
 
     })
 
-app.use('/api',router)
+    router.post("/save",update.single('myfile'), (req,res) => {
 
-app.listen(3007, () => {
+        console.log(req.file)
+        res.send('archivo cargado')
 
-    console.log('server running at 3007')
+    })
+
+server.listen(8080, () => {
+
+    console.log('server running at 8080')
 
 })
 

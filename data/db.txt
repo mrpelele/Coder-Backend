@@ -1,1 +1,1 @@
-[{"name":"bread","price":23,"id":1},{"name":"water","price":15,"id":3},{"name":"coke","price":120,"id":2},{"name":"butter","price":300,"id":4}]
+[{"name":"bread","price":23,"id":1},{"name":"water","price":15,"id":3},{"name":"coke","price":120,"id":2},{"name":"shrimp","price":180,"id":4},{"name":"milk","price":"14","id":5},{"name":"milk","price":"14","id":6},{"name":"pizza","price":"5","id":7},{"name":"dog","price":"14","id":8},{"name":"sandwich","price":"15","id":9},{"name":"chocolate","price":"60","id":10},{"name":"mac n cheese","price":"566","id":11}]
