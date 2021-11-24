@@ -13,6 +13,15 @@ const writeFileAsync = async (prod,route) => {
     })
 }
 
+const overrideFileAsync = async (route) => {
+    fs.writeFile(route,'',{encoding:'utf-8'},(err) => {
+        if (err) {
+            console.log('error deleting')
+        } else {
+            console.log('deleted')
+        }
+    })
+}
 class Container {
 
     constructor (route) {
@@ -80,6 +89,41 @@ class Container {
 
     }
 
+    async saveProdCart(prod) {
+
+        let finalProd = []
+        
+        let fileValidator = await readFileAsync(this.route)
+        
+        if (fileValidator && fileValidator.length >= 0) {
+
+            finalProd = JSON.parse(fileValidator)
+            let id = finalProd.product.length+1
+
+            prod = {...prod,id}
+            finalProd.product.push(prod)
+            console.log(finalProd)
+            let cart = {
+                id:1,
+                time: Date.now(),
+                product:finalProd.product
+            }
+            writeFileAsync(cart,this.route,id)
+
+        } else {
+            prod.id = 1
+            let currentObjId = JSON.stringify(prod.id)
+            finalProd.push(prod)
+            let cart = {
+                id:1,
+                time: Date.now(),
+                product:finalProd
+            }
+            writeFileAsync(cart,this.route,currentObjId)
+        }
+
+    }
+
     async updateProd(id,prod) {
 
         let fileValidator = await readFileAsync(this.route)
@@ -130,8 +174,35 @@ class Container {
         }
     } 
 
+    async deleteByIdCart(id) {
 
+        let fileValidator = await readFileAsync(this.route)
 
+        if (fileValidator) {
+
+            let ValidatedObj = JSON.parse(fileValidator)
+            let filteredProduct = ValidatedObj.product.filter(element => element.id !== id )
+            let finalProd = this.saveProdCart(filteredProduct)
+
+            if (filteredProduct) {
+
+                writeFileAsync(finalProd,this.route)
+                console.log('cart product deleted')
+
+            } else {
+
+                console.log('error deleting cart product')
+
+            }
+
+        }
+    } 
+
+    async deleteAll() {
+
+        await overrideFileAsync(this.route)
+
+    }
 
 }
 

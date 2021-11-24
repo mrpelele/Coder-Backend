@@ -8,6 +8,8 @@ const { Router } = express
 
 const app = express()
 
+const admin = true;
+
 const server=http.createServer(app)
 
 app.use(express.json())
@@ -42,82 +44,165 @@ app.engine('hbs', handlebars({
 
 const container = new Container ('./data/db.txt')
 
-    router.get("/",async (req,res) => {
+    //products
 
-        let product = await container.getAll()
+    router.get("/products",async (req,res) => {
 
-        console.log(product)
+        if (admin) {
+            let product = await container.getAll()
 
-        res.render('products.hbs',{product:product})
+            console.log(product)
 
+            res.render('products.hbs',{product:product})
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
 
     router.get("/addProducts", (req,res) => {
 
-        res.render('addProducts.hbs')
+        if (admin) {
+            res.render('addProducts.hbs')
+        } else {
+            res.send('ACCESS DENIED')
+        }
 
     })
 
     router.post("/addProducts",async (req,res) => {
-
-        console.log('aaaaaaaaaa',req.body)
-        const {name,price} = req.body
-        const obj = {name,price}
-        await container.saveProd(obj)
-        console.log('saved')
-        res.redirect("/api")
-    
+        
+        if (admin) {
+            const {name,price,description,stock} = req.body
+            const obj = {name,price,description,stock}
+            await container.saveProd(obj)
+            console.log('saved')
+            res.redirect("/api")
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
 
-    router.get("/allProducts", async (req,res) => {
+    router.get("/products/all", async (req,res) => {
+
+        if (admin) {
 
         res.send(await container.getAll());
-
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
 
     router.get("/product/:id", async (req,res) => {
 
-        res.send(await container.getById(JSON.parse(req.params.id)))
-
+        if (admin) {
+            res.send(await container.getById(JSON.parse(req.params.id)))
+        } else {
+            res.send('ACCESS DENIED')
+        }  
     })
 
-    router.get("/productR", async (req,res) => {
+    router.get("/productRandom", async (req,res) => {
 
-        randomNum = Math.floor(Math.random() * 5) + 1
-        res.send(await container.getById(randomNum))
-
+        if (admin) {
+            randomNum = Math.floor(Math.random() * 5) + 1
+            res.send(await container.getById(randomNum))
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
 
     router.put("/product/:id" , async (req,res) => {
 
-        const {name,price} = req.body
-        const id = JSON.parse(req.params.id)
-        const obj = {name,price,id}
-        res.send(await container.updateProd(id,obj))
-        console.log('updated!')
-
+        if (admin) {
+            const {name,price,description,stock} = req.body
+            const id = JSON.parse(req.params.id)
+            const obj = {name,price,description,stock,id}
+            res.send(await container.updateProd(id,obj))
+            console.log('updated!')
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
 
     router.post("/product/add",async  (req,res) => {
 
-        const {name,price} = req.body
-        const obj = {name,price}
-        res.send(await container.saveProd(obj))
-        console.log('saved')
+        if (admin) {
+            const {name,price,description,stock} = req.body
+            const obj = {name,price,description,stock}
+            res.send(await container.saveProd(obj))
+            console.log('saved')
 
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
 
-    router.delete("/product/:id", async (req,res) => {
+    router.delete("/product/delete/:id", async (req,res) => {
 
-        res.send(await container.deleteById(JSON.parse(req.params.id)))
-
+        if (admin) {
+            res.send(await container.deleteById(JSON.parse(req.params.id)))
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
+
+//files    
 
     router.post("/save",update.single('myfile'), (req,res) => {
 
-        console.log(req.file)
-        res.send('archivo cargado')
+        if (admin) {
+            console.log(req.file)
+            res.send('archivo cargado')
 
+        } else {
+            res.send('ACCESS DENIED')
+        }
+    })
+
+//cart
+
+const cart = new Container ('./data/cart.txt')
+
+    router.get("/cart/view", async (req,res) => {
+
+        if (admin) {
+            res.send(await cart.getAll());
+        } else {
+            res.send('ACCESS DENIED')
+        }       
+
+    })
+
+    router.post("/cart/create",async (req,res) => {
+            
+
+        if (admin) {
+            const {name,price,description,stock} = req.body
+            const obj = {name,price,description,stock}
+            await cart.saveProdCart(obj)
+            console.log('saved cart')
+            res.redirect("/api")
+        } else {
+            res.send('ACCESS DENIED')
+        }
+    })   
+
+    router.delete("/cart/delete", async (req,res) => {
+
+        if (admin) {
+            res.send(await cart.deleteAll())
+        } else {
+            res.send('ACCESS DENIED')
+        }
+    })
+
+    router.delete("/cart/delete/:id", async (req,res) => {
+
+        if (admin) {
+            res.send(await cart.deleteByIdCart(JSON.parse(req.params.id)))
+        } else {
+            res.send('ACCESS DENIED')
+        }
     })
 
 server.listen(8080, () => {
