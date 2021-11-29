@@ -2,6 +2,7 @@ const fs = require('fs')
 const express = require('express')
 const multer = require('multer')
 const http = require('http')
+const { Server: IOServer } = require('socket.io')
 const Container = require('./Functionalities/Constructor')
 const handlebars = require('express-handlebars')
 const { Router } = express
@@ -11,6 +12,8 @@ const app = express()
 const admin = true;
 
 const server=http.createServer(app)
+const io = new IOServer(server)
+
 
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
@@ -41,10 +44,17 @@ app.engine('hbs', handlebars({
     defaultLayout:'main.hbs'
 }))
 
+//welcome
 
+io.on('connection', (socket) => {
+
+      console.log('La concha de tu madre')
+
+})      
+  
 const container = new Container ('./data/db.txt')
 
-    //products
+//products
 
     router.get("/products",async (req,res) => {
 
@@ -76,7 +86,7 @@ const container = new Container ('./data/db.txt')
             const obj = {name,price,description,stock}
             await container.saveProd(obj)
             console.log('saved')
-            res.redirect("/api")
+            res.redirect("/api/products")
         } else {
             res.send('ACCESS DENIED')
         }

@@ -1,1 +1,1 @@
-[{"name":"bread","price":23,"description":"asdfgds","stock":15,"id":1}]
+[{"name":"bread","price":23,"description":"asdfgds","stock":15,"id":1},{"name":"asdf","price":"10","description":"cosa","stock":"15","id":2},{"name":"asdf","price":"10","description":"cosa","stock":"15","id":3},{"name":"asdf","price":"14","description":"lol","stock":"24","id":4}]
