@@ -1,27 +1,31 @@
-const fs = require('fs')
 const express = require('express')
-const multer = require('multer')
-const http = require('http')
-const { Server: IOServer } = require('socket.io')
-const Container = require('./Functionalities/Constructor')
-const handlebars = require('express-handlebars')
 const { Router } = express
 
+const http = require('http')
+const Container = require('./Functionalities/Constructor')
+const handlebars = require('express-handlebars')
 const app = express()
 
-const admin = true;
+const router = Router()
+app.use('/api',router)
 
-const server=http.createServer(app)
-const io = new IOServer(server)
+const admin = true;
+const server = http.createServer(app)
+const io = require("socket.io")(server)
 
 
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
 
-const router = Router()
+//static
 
-app.use('/api',router)
+app.use(express.static(__dirname + "/views/layouts"))
+
+
+
 // multer
+const multer = require('multer')
+
 let storage = multer.diskStorage({
     destination:function(req,res,cb){
         cb(null,'update')
@@ -42,26 +46,18 @@ app.engine('hbs', handlebars({
     extname:'.hbs',
     layoutsDir: __dirname+'/views/layouts',
     defaultLayout:'main.hbs'
-}))
-
-//welcome
-
-io.on('connection', (socket) => {
-
-      console.log('La concha de tu madre')
-
-})      
+})) 
   
 const container = new Container ('./data/db.txt')
 
 //products
 
+
+
     router.get("/products",async (req,res) => {
 
         if (admin) {
             let product = await container.getAll()
-
-            console.log(product)
 
             res.render('products.hbs',{product:product})
         } else {
@@ -220,5 +216,11 @@ server.listen(8080, () => {
     console.log('server running at 8080')
 
 })
+
+//websockets
+
+io.on('connection', (socket) => {
+    console.log('La concha de tu madre AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+});     
 
 
