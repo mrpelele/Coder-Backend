@@ -1,27 +1,26 @@
 const express = require('express')
 const { Router } = express
-
-const http = require('http')
 const Container = require('./Functionalities/Constructor')
-const handlebars = require('express-handlebars')
 const app = express()
 
+const {Server: HttpServer} = require('http')
+const { Server: Socket } = require('socket.io')
+const handlebars = require('express-handlebars')
+
 const router = Router()
-app.use('/api',router)
-
-const admin = true;
-const server = http.createServer(app)
-const io = require("socket.io")(server)
-
 
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
+router.use(express.urlencoded({extended:false}))
 
+app.use('/api',router)
+
+const admin = true;
+const server = new HttpServer(app)
+const io = new Socket(server)
 //static
 
 app.use(express.static(__dirname + "/views/layouts"))
-
-
 
 // multer
 const multer = require('multer')
@@ -82,7 +81,6 @@ const container = new Container ('./data/db.txt')
             const obj = {name,price,description,stock}
             await container.saveProd(obj)
             console.log('saved')
-            res.redirect("/api/products")
         } else {
             res.send('ACCESS DENIED')
         }
@@ -133,6 +131,7 @@ const container = new Container ('./data/db.txt')
     router.post("/product/add",async  (req,res) => {
 
         if (admin) {
+            console.log('aaaaaaaaaaaaaaaaaaaa',req.body)
             const {name,price,description,stock} = req.body
             const obj = {name,price,description,stock}
             res.send(await container.saveProd(obj))
@@ -211,16 +210,39 @@ const cart = new Container ('./data/cart.txt')
         }
     })
 
+//websockets
+
+    io.on('connection', async (socket) => {
+        console.log('aaaaahhhh... por fin')
+
+        let product = await container.getAll()
+
+        socket.emit('messagesBE',product)
+
+        socket.on('messagesClient', (data) => {
+            console.log('viene desde client: ',data)
+        })
+        
+        socket.on('updateList', (data) => {
+
+            product.push(data)
+            container.saveProd(data)
+            socket.emit('messagesBE',product)
+        })
+
+    });
+
+
 server.listen(8080, () => {
 
     console.log('server running at 8080')
 
 })
 
-//websockets
+app.get("/", async (req,res) => {
 
-io.on('connection', (socket) => {
-    console.log('La concha de tu madre AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-});     
+    res.redirect("/api/products")    
+
+})
 
 

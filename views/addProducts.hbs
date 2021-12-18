@@ -1,17 +1,22 @@
-
 <h1>add products</h1>
 
-<form action="/api/addProducts" method="post">
+<form onsubmit="return addInfo()">
 
-    <ul>
-        <li style="list-style: none;"> name <input type="text" name="name"> </li>
-        <li style="list-style: none;"> price <input type="number" name="price"> </li>
-        <li style="list-style: none;"> descrption <input type="text" name="description"> </li>
-        <li style="list-style: none;"> stock <input type="number" name="stock"> </li>
-    </ul>
     
-    <button type="submit">save product</button>
+    <input type="text" name="name" id="nameP" placeholder="name">
+    <input type="number" name="price" id="priceP" placeholder="price">
+    <input type="text" name="description" id="descriptionP" placeholder="description">
+    <input type="number" name="stock" id="stockP" placeholder="stock">
+    
+    
+    <button type="submit" value='save product'>save product</button>
+
 </form>
+
+    <div id='box'>
+
+
+    </div>
 
 <a href="/api/products">list of products</a>
 
