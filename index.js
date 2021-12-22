@@ -227,6 +227,8 @@ router.get("/chat",async (req,res) => {
         let product = await container.getAll()
         let chatArr = []
         
+        /* socket.emit('messagesBE',product) */
+
         socket.on('messagesClient', (data) => {
             console.log('desde FE: ',data)
         })
