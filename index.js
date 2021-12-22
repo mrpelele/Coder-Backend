@@ -212,23 +212,44 @@ const cart = new Container ('./data/cart.txt')
 
 //websockets
 
+router.get("/chat",async (req,res) => {
+
+    if (admin) {
+        res.render('chat.hbs')
+    } else {
+        res.send('ACCESS DENIED')
+    }
+})
+
     io.on('connection', async (socket) => {
         console.log('aaaaahhhh... por fin')
 
         let product = await container.getAll()
-
-        socket.emit('messagesBE',product)
-
+        let chatArr = []
+        
         socket.on('messagesClient', (data) => {
-            console.log('viene desde client: ',data)
+            console.log('desde FE: ',data)
+        })
+        socket.on('messageClient_chat', (data) => {
+            console.log('chat actualizado:',data)
         })
         
         socket.on('updateList', (data) => {
-
+            
             product.push(data)
             container.saveProd(data)
             socket.emit('messagesBE',product)
+            console.log('LIST')
+
         })
+
+        socket.on('updateChat', (data) => {
+            chatArr.push(data)
+            socket.emit('messagesBE_chat',chatArr)
+            console.log('CHAT')
+        })
+
+
 
     });
 
