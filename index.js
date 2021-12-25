@@ -67,6 +67,8 @@ const container = new Container ('./data/db.txt')
     router.get("/addProducts", (req,res) => {
 
         if (admin) {
+            
+
             res.render('addProducts.hbs')
         } else {
             res.send('ACCESS DENIED')
@@ -227,7 +229,8 @@ router.get("/chat",async (req,res) => {
         let product = await container.getAll()
         let chatArr = []
         
-        /* socket.emit('messagesBE',product) */
+        /* socket.emit('messagesBE',product)
+        socket.emit('messagesBE_chat',chatArr) */
 
         socket.on('messagesClient', (data) => {
             console.log('desde FE: ',data)

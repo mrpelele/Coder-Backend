@@ -5,12 +5,10 @@ const container = new Container ('./data/db.txt')
 const socket = io()
 socket.on('messagesBE', data => {
     console.log('array object',data)
-
+  
     socket.emit('messagesClient','soy cliente')
-    
-    if (data) {
-        render(data)
-    }
+
+    render(data)
     
 })
 
@@ -18,6 +16,7 @@ socket.on('messagesBE_chat',data => {
     console.log('messagesBE_chat')
 
     socket.emit('messageClient_chat',data)
+
     renderChat(data)
 
 })
