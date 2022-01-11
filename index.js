@@ -1,4 +1,5 @@
 const express = require('express')
+const knex = require('./db.js')
 const { Router } = express
 const Container = require('./Functionalities/Constructor')
 const app = express()
@@ -56,7 +57,13 @@ const container = new Container ('./data/db.txt')
     router.get("/products",async (req,res) => {
 
         if (admin) {
-            let product = await container.getAll()
+            const product = []
+        
+            await knex.from('products').then((res) => {
+                console.log('XD',res)
+                product.push(...res)
+            })
+            console.log('lol',product)
 
             res.render('products.hbs',{product:product})
         } else {
@@ -81,8 +88,15 @@ const container = new Container ('./data/db.txt')
         if (admin) {
             const {name,price,description,stock} = req.body
             const obj = {name,price,description,stock}
-            await container.saveProd(obj)
-            console.log('saved')
+
+            knex('products')
+            .insert(obj)
+            .then(() => {
+                console.log('objeto SQL creado');
+            })
+            .catch((err) => {
+                console.log('error al crear objeto SQL',err);
+            });
         } else {
             res.send('ACCESS DENIED')
         }
@@ -133,11 +147,17 @@ const container = new Container ('./data/db.txt')
     router.post("/product/add",async  (req,res) => {
 
         if (admin) {
-            console.log('aaaaaaaaaaaaaaaaaaaa',req.body)
             const {name,price,description,stock} = req.body
             const obj = {name,price,description,stock}
-            res.send(await container.saveProd(obj))
-            console.log('saved')
+
+            knex('products')
+            .insert(obj)
+            .then(() => {
+                res.send('objeto SQL creado');
+            })
+            .catch((err) => {
+                res.send('error al crear objeto SQL',err);
+            });
 
         } else {
             res.send('ACCESS DENIED')
@@ -151,6 +171,63 @@ const container = new Container ('./data/db.txt')
         } else {
             res.send('ACCESS DENIED')
         }
+    })
+
+// products SQL
+
+    router.get("/SQL/products",async (req,res) => {
+
+        const arr = []
+
+        if (admin) {
+        
+            await knex.from('products').then((res) => {
+                arr.push(...res)
+            })
+            console.log('lol',arr)
+            res.send(arr)
+
+        } else {
+            res.send('ACCESS DENIED')
+        }
+    })
+
+    router.get("/SQL/addProduct", (req,res) => {
+
+        if (admin) {
+
+            res.render('addProducts.hbs') //refactorize XD, sql QUERY GETS OVERRIDEN BY NORMAL EXPRESS AND WEBSOCKETS
+
+        } else {
+            res.send('ACCESS DENIED')
+        }
+
+        
+    })
+
+    router.post("/SQL/addProduct", (req,res) => {
+
+        if (admin) {
+
+            const {name,price,description,stock} = req.body
+            const obj = {name,price,description,stock}
+
+            knex('products')
+            .insert(obj)
+            .then(() => {
+                res.send('objeto SQL creado');
+            })
+            .catch((err) => {
+                res.send('error al crear objeto SQL',err);
+            });
+
+        } else {
+
+            res.send('ACCESS DENIED')
+
+        }
+
+        
     })
 
 //files    
